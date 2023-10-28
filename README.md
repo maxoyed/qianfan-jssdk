@@ -26,3 +26,7 @@ const resp = await api_client.chat({
 // 打印结果
 console.log(resp.result);
 ```
+
+## LICENSE
+
+Qianfan JS SDK is released under the [MIT license](https://github.com/maxoyed/qianfan-jssdk/blob/master/LICENSE).
