@@ -13,20 +13,24 @@ npm install qianfan
 ```javascript
 import { Qianfan } from "qianfan";
 
-api_client = new Qianfan("API_KEY", "SECRET_KEY");
+const api_client = new Qianfan("API_KEY", "SECRET_KEY");
 
-// 发起对话
-const resp = await api_client.chat({
-    messages: [
-        {
-            role: "user",
-            content: "Hello World",
-        },
-    ],
-});
+async function main() {
+    // 发起对话
+    const resp = await api_client.chat({
+        messages: [
+            {
+                role: "user",
+                content: "Hello World",
+            },
+        ],
+    });
 
-// 打印结果
-console.log(resp.result);
+    // 打印结果
+    console.log(resp.result);
+}
+
+main();
 ```
 
 ## LICENSE
