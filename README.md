@@ -1,5 +1,7 @@
 # 百度智能云千帆大模型平台 JS SDK
 
+[![npm version](https://badge.fury.io/js/qianfan.svg)](https://www.npmjs.com/package/qianfan)
+
 ## 安装
 
 ```shell
