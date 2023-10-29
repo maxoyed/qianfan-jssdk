@@ -17,6 +17,11 @@ async function main() {
         ],
     });
     console.log(resp);
+
+    const text2image_resp = await client.text2image({
+        prompt: "cat",
+    });
+    console.log(text2image_resp);
 }
 
 main();

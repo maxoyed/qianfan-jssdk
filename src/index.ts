@@ -1,10 +1,12 @@
 import axios from "axios";
 import {
     AccessTokenResp,
-    TChatModelPublicInfo,
-    EChatModelNames,
-    ChatBodyBase,
-    ChatRespErnieBot,
+    ChatModelInfo,
+    ChatBody,
+    ChatResp,
+    ChatModel,
+    Text2ImageBody,
+    Text2ImageResp,
 } from "./interface";
 
 export class Qianfan {
@@ -16,33 +18,39 @@ export class Qianfan {
     };
     private readonly api_base =
         "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop";
-    private readonly chat_models: TChatModelPublicInfo = {
-        [EChatModelNames.ErnieBot4]: {
+    private readonly chat_models: ChatModelInfo = {
+        "ERNIE-Bot-4": {
             endpoint: "completions_pro",
         },
-        [EChatModelNames.ErnieBot]: {
+        "ERNIE-Bot": {
             endpoint: "completions",
         },
-        [EChatModelNames.ErnieBotTurbo]: {
+        "ERNIE-Bot-turbo": {
             endpoint: "eb-instant",
         },
-        [EChatModelNames.Bloomz7B]: {
+        "BLOOMZ-7B": {
             endpoint: "bloomz_7b1",
         },
-        [EChatModelNames.QianfanBloomz7BCompressed]: {
+        "Qianfan-BLOOMZ-7B-compressed": {
             endpoint: "qianfan_bloomz_7b_compressed",
         },
-        [EChatModelNames.Llama27BChat]: {
+        "Llama-2-7b-chat": {
             endpoint: "llama_2_7b",
         },
-        [EChatModelNames.Llama213BChat]: {
+        "Llama-2-13b-chat": {
             endpoint: "llama_2_13b",
         },
-        [EChatModelNames.Llama270BChat]: {
+        "Llama-2-70b-chat": {
             endpoint: "llama_2_70b",
         },
-        [EChatModelNames.QianfanChineseLlama27B]: {
+        "Qianfan-Chinese-Llama-2-7B": {
             endpoint: "qianfan_chinese_llama_2_7b",
+        },
+        "ChatGLM2-6B-32K": {
+            endpoint: "chatglm2_6b_32k",
+        },
+        "AquilaChat-7B": {
+            endpoint: "aquilachat_7b",
         },
     };
     access_token: string = "";
@@ -81,10 +89,10 @@ export class Qianfan {
      * @param body 请求参数
      * @returns Promise<ChatResp>
      */
-    public async chat(
-        body: ChatBodyBase,
-        model: EChatModelNames = EChatModelNames.ErnieBot,
-    ): Promise<ChatRespErnieBot> {
+    public async chat<T extends ChatModel>(
+        body: ChatBody<T>,
+        model: T = "ERNIE-Bot" as T,
+    ): Promise<ChatResp<T>> {
         const endpoint = this.chat_models[model].endpoint;
         if (this.expires_in < Date.now() / 1000) {
             await this.getAccessToken();
@@ -94,6 +102,24 @@ export class Qianfan {
         if (resp.data?.error_code && resp.data?.error_msg) {
             throw new Error(resp.data.error_msg);
         }
-        return resp.data as ChatRespErnieBot;
+        return resp.data as ChatResp<T>;
+    }
+
+    /**
+     * 发起文生图请求
+     * @param body 请求参数
+     * @returns Promise<Text2ImageResp>
+     */
+    public async text2image(body: Text2ImageBody): Promise<Text2ImageResp> {
+        const endpoint = "sd_xl";
+        if (this.expires_in < Date.now() / 1000) {
+            await this.getAccessToken();
+        }
+        const url = `${this.api_base}/text2image/${endpoint}?access_token=${this.access_token}`;
+        const resp = await axios.post(url, body, { headers: this.headers });
+        if (resp.data?.error_code && resp.data?.error_msg) {
+            throw new Error(resp.data.error_msg);
+        }
+        return resp.data as Text2ImageResp;
     }
 }

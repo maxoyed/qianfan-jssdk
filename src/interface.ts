@@ -13,6 +13,39 @@ export interface AccessTokenResp {
 }
 
 /**
+ * 对话请求公共服务模型列表
+ */
+export type ChatModel =
+    | "ERNIE-Bot-4"
+    | "ERNIE-Bot"
+    | "ERNIE-Bot-turbo"
+    | "BLOOMZ-7B"
+    | "Qianfan-BLOOMZ-7B-compressed"
+    | "Llama-2-7b-chat"
+    | "Llama-2-13b-chat"
+    | "Llama-2-70b-chat"
+    | "Qianfan-Chinese-Llama-2-7B"
+    | "ChatGLM2-6B-32K"
+    | "AquilaChat-7B";
+
+/**
+ * 对话请求公共服务模型信息
+ */
+export type ChatModelInfo = Record<
+    ChatModel,
+    {
+        /**
+         * API 请求节点
+         */
+        endpoint: string;
+        /**
+         * 模型描述
+         */
+        description?: string;
+    }
+>;
+
+/**
  * 对话消息基类
  */
 export interface ChatMessageBase {
@@ -63,19 +96,23 @@ export interface ChatMessageWithFunction {
 /**
  * 对话消息
  */
-export type ChatMessage = ChatMessageBase | ChatMessageWithFunction;
+export type ChatMessage<T extends ChatModel> = T extends "ERNIE-Bot-4"
+    ? ChatMessageBase | ChatMessageWithFunction
+    : T extends "ERNIE-Bot"
+    ? ChatMessageBase | ChatMessageWithFunction
+    : ChatMessageBase;
 
 /**
  * 对话请求基类
  */
-export interface ChatBodyBase {
+export interface ChatBodyBase<T extends ChatModel> {
     /**
      * 聊天上下文信息
      * 1. messages 成员不能为空，1 个成员表示单轮对话，多个成员表示多轮对话
      * 2. 最后一个 message 为当前请求的信息，前面的 message 为历史对话信息
      * 3. 必须为奇数个成员
      */
-    messages: ChatMessage[];
+    messages: ChatMessage<T>[];
     /**
      * 是否以流式接口的形式返回数据，默认为 false（当前版本 SDK 未实现流式接口支持）
      */
@@ -89,7 +126,8 @@ export interface ChatBodyBase {
 /**
  * ERNIE-Bot-turbo 对话请求
  */
-export interface ChatBodyErnieBotTurbo extends ChatBodyBase {
+export interface ChatBodyErnieBotTurbo<T extends ChatModel>
+    extends ChatBodyBase<T> {
     /**
      * 1. 较高的数值会使输出更加随机，而较低的数值会使其更加集中和确定
      * 2. 默认 0.95，范围 (0, 1.0]，不能为 0
@@ -121,7 +159,7 @@ export interface ChatBodyErnieBotTurbo extends ChatBodyBase {
 /**
  * 可触发函数
  */
-export interface ErnieBotFunction {
+export type ErnieBotFunction<T extends ChatModel> = {
     /**
      * 函数名
      */
@@ -143,17 +181,18 @@ export interface ErnieBotFunction {
     /**
      * function 调用的一些历史示例
      */
-    examples: ChatMessage[];
-}
+    examples: ChatMessage<T>[];
+};
 
 /**
  * ERNIE-Bot 和 ERNIE-Bot-4 对话请求
  */
-export interface ChatBodyErnieBot extends ChatBodyErnieBotTurbo {
+export interface ChatBodyErnieBot<T extends ChatModel>
+    extends ChatBodyErnieBotTurbo<T> {
     /**
      * 一个可触发函数的描述列表
      */
-    functions?: ErnieBotFunction[];
+    functions?: ErnieBotFunction<T>[];
 }
 
 /**
@@ -204,18 +243,22 @@ export interface PluginTokenUsage {
  * token 用量（包括插件）
  */
 export interface TokenUsageWithPlugins extends TokenUsageBase {
-    plugins: PluginTokenUsage[];
+    plugins?: PluginTokenUsage[];
 }
 
 /**
  * token 用量
  */
-export type TokenUsage = TokenUsageBase | TokenUsageWithPlugins;
+export type TokenUsage<T extends ChatModel> = T extends "ERNIE-Bot-4"
+    ? TokenUsageWithPlugins
+    : T extends "ERNIE-Bot"
+    ? TokenUsageWithPlugins
+    : TokenUsageBase;
 
 /**
  * 对话响应基类
  */
-export interface ChatRespBase {
+export interface ChatRespBase<T extends ChatModel> {
     /**
      * 本轮对话的id
      */
@@ -260,13 +303,13 @@ export interface ChatRespBase {
     /**
      * token统计信息，token数 = 汉字数+单词数*1.3 （仅为估算逻辑）
      */
-    usage: TokenUsage;
+    usage: TokenUsage<T>;
 }
 
 /**
  * ERNIE-Bot 和 ERNIE-Bot-4 对话响应
  */
-export interface ChatRespErnieBot extends ChatRespBase {
+export interface ChatRespErnieBot<T extends ChatModel> extends ChatRespBase<T> {
     /**
      * 由模型生成的函数调用，包含函数名称，和调用参数
      */
@@ -288,35 +331,153 @@ export interface ChatRespError {
 }
 
 /**
- * 对话响应
+ * 对话请求参数
  */
-export type ChatResp = ChatRespErnieBot | ChatRespError;
+export type ChatBody<T extends ChatModel> = T extends "ERNIE-Bot-4"
+    ? ChatBodyErnieBot<T>
+    : T extends "ERNIE-Bot"
+    ? ChatBodyErnieBot<T>
+    : T extends "ERNIE-Bot-turbo"
+    ? ChatBodyErnieBotTurbo<T>
+    : ChatBodyBase<T>;
 
 /**
- * 对话请求公共服务模型列表
+ * 对话响应
  */
-export enum EChatModelNames {
-    ErnieBot4 = "ERNIE-Bot-4",
-    ErnieBot = "ERNIE-Bot",
-    ErnieBotTurbo = "ERNIE-Bot-turbo",
-    Bloomz7B = "BLOOMZ-7B",
-    QianfanBloomz7BCompressed = "Qianfan-BLOOMZ-7B-compressed",
-    Llama27BChat = "Llama-2-7b-chat",
-    Llama213BChat = "Llama-2-13b-chat",
-    Llama270BChat = "Llama-2-70b-chat",
-    QianfanChineseLlama27B = "Qianfan-Chinese-Llama-2-7B",
+export type ChatResp<T extends ChatModel> = T extends "ERNIE-Bot-4"
+    ? ChatRespErnieBot<T>
+    : T extends "ERNIE-Bot"
+    ? ChatRespErnieBot<T>
+    : T extends "ERNIE-Bot-turbo"
+    ? ChatRespErnieBot<T>
+    : ChatRespBase<T>;
+
+/**
+ * 文生图请求参数
+ */
+export interface Text2ImageBody {
+    /**
+     * 提示词，即用户希望图片包含的元素。长度限制为1024字符，建议中文或者英文单词总数量不超过150个
+     */
+    prompt: string;
+    /**
+     * 反向提示词，即用户希望图片不包含的元素。长度限制为1024字符，建议中文或者英文单词总数量不超过150个
+     */
+    negative_prompt?: string;
+    /**
+     * 生成图片长宽，默认值 1024x1024
+     *
+     * 取值范围如下：
+     * ["512x512", "768x768", "768x1024", "1024x768", "576x1024", "1024x576", "1024x1024"]
+     *
+     * 各尺寸对应的比例为：["1:1","1:1","3:4","4:3","9:16","16:9","1:1"]
+     */
+    size?:
+        | "512x512"
+        | "768x768"
+        | "768x1024"
+        | "1024x768"
+        | "576x1024"
+        | "1024x576"
+        | "1024x1024";
+    /**
+     * 生成图片数量，说明：
+     * - 默认值为1
+     * - 取值范围为1-4
+     * - 单次生成的图片较多及请求较频繁可能导致请求超时
+     */
+    n?: 1 | 2 | 3 | 4;
+    /**
+     * 迭代轮次，说明：
+     * - 默认值为20
+     * - 取值范围为10-50
+     */
+    steps?: number;
+    /**
+     * 采样方式，默认值：Euler a，可选值如下：
+     * - Euler
+     * - Euler a
+     * - DPM++ 2M
+     * - DPM++ 2M Karras
+     * - LMS Karras
+     * - DPM++ SDE
+     * - DPM++ SDE Karras
+     * - DPM2 a Karras
+     * - Heun
+     * - DPM++ 2M SDE
+     * - DPM++ 2M SDE Karras
+     * - DPM2
+     * - DPM2 Karras
+     * - DPM2 a
+     * - LMS
+     */
+    sampler_index?:
+        | "Euler"
+        | "Euler a"
+        | "DPM++ 2M"
+        | "DPM++ 2M Karras"
+        | "LMS Karras"
+        | "DPM++ SDE"
+        | "DPM++ SDE Karras"
+        | "DPM2 a Karras"
+        | "Heun"
+        | "DPM++ 2M SDE"
+        | "DPM++ 2M SDE Karras"
+        | "DPM2"
+        | "DPM2 Karras"
+        | "DPM2 a"
+        | "LMS";
+    /**
+     * 表示最终用户的唯一标识符，可以监视和检测滥用行为，防止接口恶意调用
+     */
+    user_id?: string;
 }
 
-export type TChatModelPublicInfo = Record<
-    EChatModelNames,
-    {
-        /**
-         * API 请求节点
-         */
-        endpoint: string;
-        /**
-         * 模型描述
-         */
-        description?: string;
-    }
->;
+export interface Text2ImageRespImageData {
+    object: "image";
+    /**
+     * 图片base64编码内容
+     */
+    b64_image: string;
+    /**
+     * 图片base64编码内容
+     */
+    index: number;
+}
+
+export interface Text2ImageRespUsage {
+    /**
+     * 问题tokens数，包含提示词和负向提示词
+     */
+    prompt_tokens: number;
+    /**
+     * tokens总数
+     */
+    total_tokens: number;
+}
+
+/**
+ * 文生图响应
+ */
+export interface Text2ImageResp {
+    /**
+     * 请求的id
+     */
+    id: string;
+    /**
+     * 回包类型。image：图像生成返回
+     */
+    object: string;
+    /**
+     * 时间戳
+     */
+    created: number;
+    /**
+     * 生成图片结果
+     */
+    data: Text2ImageRespImageData[];
+    /**
+     * token统计信息，token数 = 汉字数+单词数*1.3 （仅为估算逻辑）
+     */
+    usage: Text2ImageRespUsage;
+}

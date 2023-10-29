@@ -28,6 +28,13 @@ async function main() {
 
     // 打印结果
     console.log(resp.result);
+
+    // 文生图
+    const text2image_resp = await client.text2image({
+        prompt: "cat",
+    });
+    // 打印结果
+    console.log(text2image_resp);
 }
 
 main();
