@@ -22,6 +22,9 @@ export class Qianfan {
         "ERNIE-Bot-4": {
             endpoint: "completions_pro",
         },
+        "ERNIE-Bot-8K": {
+            endpoint: "ernie_bot_8k",
+        },
         "ERNIE-Bot": {
             endpoint: "completions",
         },
@@ -71,7 +74,11 @@ export class Qianfan {
      */
     public async getAccessToken(): Promise<AccessTokenResp> {
         const url = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${this.API_KEY}&client_secret=${this.SECRET_KEY}`;
-        const resp = await axios.post(url, {}, { headers: this.headers });
+        const resp = await axios.post(
+            url,
+            {},
+            { headers: this.headers, withCredentials: false },
+        );
         if (resp.data?.error && resp.data?.error_description) {
             throw new Error(resp.data.error_description);
         }

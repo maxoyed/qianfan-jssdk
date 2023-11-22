@@ -17,6 +17,7 @@ export interface AccessTokenResp {
  */
 export type ChatModel =
     | "ERNIE-Bot-4"
+    | "ERNIE-Bot-8K"
     | "ERNIE-Bot"
     | "ERNIE-Bot-turbo"
     | "BLOOMZ-7B"
@@ -97,6 +98,8 @@ export interface ChatMessageWithFunction {
  * 对话消息
  */
 export type ChatMessage<T extends ChatModel> = T extends "ERNIE-Bot-4"
+    ? ChatMessageBase | ChatMessageWithFunction
+    : T extends "ERNIE-Bot-8K"
     ? ChatMessageBase | ChatMessageWithFunction
     : T extends "ERNIE-Bot"
     ? ChatMessageBase | ChatMessageWithFunction
@@ -251,6 +254,8 @@ export interface TokenUsageWithPlugins extends TokenUsageBase {
  */
 export type TokenUsage<T extends ChatModel> = T extends "ERNIE-Bot-4"
     ? TokenUsageWithPlugins
+    : T extends "ERNIE-Bot-8K"
+    ? TokenUsageWithPlugins
     : T extends "ERNIE-Bot"
     ? TokenUsageWithPlugins
     : TokenUsageBase;
@@ -335,6 +340,8 @@ export interface ChatRespError {
  */
 export type ChatBody<T extends ChatModel> = T extends "ERNIE-Bot-4"
     ? ChatBodyErnieBot<T>
+    : T extends "ERNIE-Bot-8K"
+    ? ChatBodyErnieBot<T>
     : T extends "ERNIE-Bot"
     ? ChatBodyErnieBot<T>
     : T extends "ERNIE-Bot-turbo"
@@ -345,6 +352,8 @@ export type ChatBody<T extends ChatModel> = T extends "ERNIE-Bot-4"
  * 对话响应
  */
 export type ChatResp<T extends ChatModel> = T extends "ERNIE-Bot-4"
+    ? ChatRespErnieBot<T>
+    : T extends "ERNIE-Bot-8K"
     ? ChatRespErnieBot<T>
     : T extends "ERNIE-Bot"
     ? ChatRespErnieBot<T>

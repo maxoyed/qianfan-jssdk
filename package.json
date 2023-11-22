@@ -1,6 +1,6 @@
 {
     "name": "qianfan",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "百度智能云千帆大模型平台JS SDK",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -13,6 +13,7 @@
         "lint": "eslint --ignore-path .eslintignore --ext .js,.ts",
         "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
         "test": "jest --config jest.config.ts",
+        "test:coverage": "jest --config jest.config.ts --coverage",
         "prepare": "npm run build",
         "prepublishOnly": "npm run test && npm run lint",
         "preversion": "npm run lint",
