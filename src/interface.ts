@@ -20,13 +20,18 @@ export type ChatModel =
     | "ERNIE-Bot-8K"
     | "ERNIE-Bot"
     | "ERNIE-Bot-turbo"
+    | "EB-turbo-AppBuilder"
+    | "Yi-34B-Chat"
     | "BLOOMZ-7B"
     | "Qianfan-BLOOMZ-7B-compressed"
     | "Llama-2-7b-chat"
     | "Llama-2-13b-chat"
     | "Llama-2-70b-chat"
     | "Qianfan-Chinese-Llama-2-7B"
+    | "Qianfan-Chinese-Llama-2-13B"
     | "ChatGLM2-6B-32K"
+    | "XuanYuan-70B-Chat-4bit"
+    | "ChatLaw"
     | "AquilaChat-7B";
 
 /**
@@ -382,13 +387,13 @@ export interface Text2ImageBody {
      * 各尺寸对应的比例为：["1:1","1:1","3:4","4:3","9:16","16:9","1:1"]
      */
     size?:
-        | "512x512"
-        | "768x768"
-        | "768x1024"
-        | "1024x768"
-        | "576x1024"
-        | "1024x576"
-        | "1024x1024";
+    | "512x512"
+    | "768x768"
+    | "768x1024"
+    | "1024x768"
+    | "576x1024"
+    | "1024x576"
+    | "1024x1024";
     /**
      * 生成图片数量，说明：
      * - 默认值为1
@@ -421,21 +426,53 @@ export interface Text2ImageBody {
      * - LMS
      */
     sampler_index?:
-        | "Euler"
-        | "Euler a"
-        | "DPM++ 2M"
-        | "DPM++ 2M Karras"
-        | "LMS Karras"
-        | "DPM++ SDE"
-        | "DPM++ SDE Karras"
-        | "DPM2 a Karras"
-        | "Heun"
-        | "DPM++ 2M SDE"
-        | "DPM++ 2M SDE Karras"
-        | "DPM2"
-        | "DPM2 Karras"
-        | "DPM2 a"
-        | "LMS";
+    | "Euler"
+    | "Euler a"
+    | "DPM++ 2M"
+    | "DPM++ 2M Karras"
+    | "LMS Karras"
+    | "DPM++ SDE"
+    | "DPM++ SDE Karras"
+    | "DPM2 a Karras"
+    | "Heun"
+    | "DPM++ 2M SDE"
+    | "DPM++ 2M SDE Karras"
+    | "DPM2"
+    | "DPM2 Karras"
+    | "DPM2 a"
+    | "LMS";
+    /**
+     * 随机种子，说明：
+     * - 不设置时，自动生成随机数
+     * - 取值范围 [0, 4294967295]
+     */
+    seed?: number;
+    /**
+     * 提示词相关性，说明：默认值为5，取值范围0-30
+     */
+    cfg_scale?: number;
+    /**
+     * 生成风格，可选值如下
+     * - Base：基础风格（默认）
+     * - 3D Model：3D模型
+     * - Analog Film：模拟胶片
+     * - Anime：动漫
+     * - Cinematic：电影
+     * - Comic Book：漫画
+     * - Craft Clay：工艺黏土
+     * - Digital Art：数字艺术
+     * - Enhance：增强
+     * - Fantasy Art：幻想艺术
+     * - lsometric：等距风格
+     * - Line Art：线条艺术
+     * - Lowpoly：低多边形
+     * - Neonpunk：霓虹朋克
+     * - Origami：折纸
+     * - Photographic：摄影
+     * - Pixel Art：像素艺术
+     * - Texture：纹理
+     */
+    style?: "Base" | "3D Model" | "Analog Film" | "Anime" | "Cinematic" | "Comic Book" | "Craft Clay" | "Digital Art" | "Enhance" | "Fantasy Art" | "lsometric" | "Line Art" | "Lowpoly" | "Neonpunk" | "Origami" | "Photographic" | "Pixel Art" | "Texture";
     /**
      * 表示最终用户的唯一标识符，可以监视和检测滥用行为，防止接口恶意调用
      */

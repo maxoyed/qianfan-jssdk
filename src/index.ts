@@ -31,6 +31,12 @@ export class Qianfan {
         "ERNIE-Bot-turbo": {
             endpoint: "eb-instant",
         },
+        "EB-turbo-AppBuilder": {
+            endpoint: "ai_apaas"
+        },
+        "Yi-34B-Chat": {
+            endpoint: "yi_34b_chat"
+        },
         "BLOOMZ-7B": {
             endpoint: "bloomz_7b1",
         },
@@ -49,8 +55,17 @@ export class Qianfan {
         "Qianfan-Chinese-Llama-2-7B": {
             endpoint: "qianfan_chinese_llama_2_7b",
         },
+        "Qianfan-Chinese-Llama-2-13B": {
+            endpoint: "qianfan_chinese_llama_2_13b"
+        },
         "ChatGLM2-6B-32K": {
             endpoint: "chatglm2_6b_32k",
+        },
+        "XuanYuan-70B-Chat-4bit": {
+            endpoint: "xuanyuan_70b_chat"
+        },
+        "ChatLaw": {
+            endpoint: "chatlaw"
         },
         "AquilaChat-7B": {
             endpoint: "aquilachat_7b",
@@ -94,13 +109,17 @@ export class Qianfan {
      * 发起对话请求
      * @param model 模型名称
      * @param body 请求参数
+     * @param endpoint 申请发布时填写的API地址
      * @returns Promise<ChatResp>
      */
     public async chat<T extends ChatModel>(
         body: ChatBody<T>,
         model: T = "ERNIE-Bot" as T,
+        endpoint: string = "",
     ): Promise<ChatResp<T>> {
-        const endpoint = this.chat_models[model].endpoint;
+        if (endpoint.length === 0) {
+            endpoint = this.chat_models[model].endpoint;
+        }
         if (this.expires_in < Date.now() / 1000) {
             await this.getAccessToken();
         }

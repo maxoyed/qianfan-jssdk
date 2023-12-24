@@ -12,16 +12,16 @@ async function main() {
         messages: [
             {
                 role: "user",
-                content: "你好",
+                content: "你好，请问你是哪个模型？",
             },
         ],
-    });
+    }, "Yi-34B-Chat");
     console.log(resp);
 
-    const text2image_resp = await client.text2image({
-        prompt: "cat",
-    });
-    console.log(text2image_resp);
+    // const text2image_resp = await client.text2image({
+    //     prompt: "cat",
+    // });
+    // console.log(text2image_resp);
 }
 
 main();
