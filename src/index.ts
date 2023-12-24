@@ -7,6 +7,9 @@ import {
     ChatModel,
     Text2ImageBody,
     Text2ImageResp,
+    PluginBody,
+    PluginName,
+    PluginResp,
 } from "./interface";
 
 export class Qianfan {
@@ -147,5 +150,24 @@ export class Qianfan {
             throw new Error(resp.data.error_msg);
         }
         return resp.data as Text2ImageResp;
+    }
+
+    /**
+     * 插件应用请求
+     * @param endpoint 服务地址后缀名称
+     * @param body 请求参数
+     * @returns Promise<PluginResp>
+     */
+    public async plugin<T extends PluginName>(endpoint: string, plugins: T, body: PluginBody<T>) {
+        if (this.expires_in < Date.now() / 1000) {
+            await this.getAccessToken();
+        }
+        body.plugins = plugins;
+        const url = `${this.api_base}/plugin/${endpoint}/?access_token=${this.access_token}`;
+        const resp = await axios.post(url, body, { headers: this.headers });
+        if (resp.data?.error_code && resp.data?.error_msg) {
+            throw new Error(resp.data.error_msg);
+        }
+        return resp.data as PluginResp<T>;
     }
 }

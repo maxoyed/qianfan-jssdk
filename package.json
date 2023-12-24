@@ -1,6 +1,6 @@
 {
     "name": "qianfan",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "description": "百度智能云千帆大模型平台JS SDK",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",

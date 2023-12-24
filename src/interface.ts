@@ -527,3 +527,222 @@ export interface Text2ImageResp {
      */
     usage: Text2ImageRespUsage;
 }
+
+export type PluginName = ["uuid-zhishiku"] | ["uuid-chatocr"] | ["uuid-weatherforecast"]
+
+export interface PluginBodyBase {
+    /**
+     * 查询信息。说明：
+     * 1. 成员不能为空
+     * 2. 长度不能超过1000个字符
+     */
+    query: string;
+    /**
+     * 需要调用的插件ID列表
+     * - 知识库插件固定值为 `["uuid-zhishiku"]`
+     * - 智慧图问插件固定值为 `["uuid-chatocr"]`
+     * - 天气插件固定值为 `["uuid-weatherforecast"]`
+     */
+    plugins?: PluginName;
+    /**
+     * llm相关参数，不指定参数时，使用调试过程中的默认值。
+     * 参数示例：
+     * ```json
+     * {
+     *   "temperature":0.1,
+     *   "top_p":1,
+     *   "penalty_score":1
+     * }
+     * ```
+     */
+    llm?: {
+        temperature: number;
+        top_p: number;
+        penalty_score: number;
+    };
+    /**
+     * 说明：
+     * 1. 如果prompt中使用了变量，推理时可以填写具体值；
+     * 2. 如果prompt中未使用变量，该字段不填。
+     * 参数示例：
+     * ```json
+     * {
+     *   "key1":"value1",
+     *   "key2":"value2"
+     * }
+     * ```
+     * key1、key2为配置时prompt中使用了变量key
+     */
+    input_variables?: {
+        [key: string]: string
+    };
+    /**
+     * 聊天上下文信息。
+     * 参数示例：
+     * ```json
+     * [
+     *   {
+     *     "role":"user",
+     *     "content":"..."
+     *   },
+     *   {
+     *     "role":"assisant",
+     *     "content":"..."
+     *   }
+     * ]
+     * ```
+     */
+    history?: ChatMessageBase[];
+    /**
+     * 是否返回插件的原始请求信息，默认false，可选值如下：
+     * - `true`: 是，返回插件的原始请求信息meta_info
+     * - `false`: 否，不返回插件的原始请求信息meta_info
+     */
+    verbose?: boolean;
+}
+
+export interface PluginBodyChatOCR extends PluginBodyBase {
+    /**
+     * 智慧图问插件使用图片的URL地址，说明：
+     * 1. 图片要求是百度bos上的图片，即用户必须现将图片上传至百度bos，图片url地址包含bcebos.com
+     * 2. 图片支持jpg、jpeg、png、bmp、webp，必须带后缀名
+     */
+    fileurl: string;
+}
+
+export type PluginBody<T extends PluginName> = T extends ["uuid-chatocr"] ? PluginBodyChatOCR : PluginBodyBase;
+
+export interface PluginRespMetaInfoRequestZhishiku {
+    /**
+     * 用于查询知识库的用户请求
+     */
+    query: string;
+    /**
+     * 使用知识库的 Id 列表
+     */
+    kbIds: string[];
+    /**
+     * 分片和query的相似度分数的下限，低于该下限的文档分片不会被返回
+     */
+    score: number;
+    /**
+     * 返回的最相关的文档数
+     */
+    topN: number;
+}
+
+export interface PluginRespMetaInfoResponseZhishiku {
+    /**
+     * 文档分片的下载地址
+     */
+    contentUrl: string;
+    /**
+     * 文档 Id
+     */
+    docId: string;
+    /**
+     * 文档的名称
+     */
+    docName: string;
+    /**
+     * 文档上传的知识库 Id
+     */
+    kbId: string;
+    /**
+     * 当前分片和用户请求的相关度，取值范围（0-1）
+     */
+    score: number;
+    /**
+     * 分片 ID
+     */
+    shardId: string;
+    /**
+     * 分片序号
+     */
+    shardIndex: number;
+    /**
+     * 分片的实际内容
+     */
+    content: string;
+}
+
+export interface PluginRespMetaInfoRequestChatOCR {
+    /**
+     * 用于查询用户请求
+     */
+    query: string;
+    /**
+     * 从文件地址中解析出的文件名称
+     */
+    filename: string;
+}
+
+export interface PluginRespMetaInfoResponseChatOCR {
+    /**
+     * 错误码
+     */
+    error_no: number;
+    /**
+     * 错误信息
+     */
+    error_msg: string;
+    /**
+     * 当前返回的数据格式，可忽略
+     */
+    format: string;
+    /**
+     * OCR 返回的识别信息
+     */
+    result: {
+        /**
+         * 用户请求的实际返回结果
+         */
+        llm_result: string;
+        /**
+         * OCR 接口返回的识别文字信息
+         */
+        ocr_result: {
+            /**
+             * 文字所在的位置，识别为矩形框
+             */
+            rect: {
+                /**
+                 * 文字框左上角相对于图片左上角的横向偏移量，单位为像素
+                 */
+                left: number;
+                /**
+                 * 文字框左上角相对于图片左上角的纵向偏移量，单位为像素
+                 */
+                top: number;
+                /**
+                 * 文字框的宽度，单位为像素
+                 */
+                width: number;
+                /**
+                 * 文字框的高度，单位为像素
+                 */
+                height: number;
+            };
+            /**
+             * 文字内容
+             */
+            word: string;
+        }[]
+    };
+    /**
+     * 唯一的logid，用于问题定位
+     */
+    logid: number;
+}
+
+export interface PluginRespMetaInfo<T extends PluginName> {
+    request: T extends ["uuid-zhishiku"] ? PluginRespMetaInfoRequestZhishiku : T extends ["uuid-chatocr"] ? PluginRespMetaInfoRequestChatOCR : null;
+    response: T extends ["uuid-zhishiku"] ? PluginRespMetaInfoResponseZhishiku : T extends ["uuid-chatocr"] ? PluginRespMetaInfoResponseChatOCR : null;
+}
+
+export interface PluginResp<T extends PluginName> extends ChatRespBase<"ERNIE-Bot-turbo"> {
+    /**
+     * 插件的原始请求信息
+     */
+    meta_info: T extends ["uuid-weatherforecast"] ? "" : PluginRespMetaInfo<T>
+}

@@ -35,6 +35,17 @@ async function main() {
     });
     // 打印结果
     console.log(text2image_resp);
+
+    // 插件应用
+    const plugin_resp = await client.plugin(
+        "YOUR_SERVICE_ENDPOINT",
+        ["uuid-zhishiku"],
+        {
+            query: "焊头沾水会怎么样？",
+        },
+    );
+    // 打印结果
+    console.log(plugin_resp);
 }
 
 main();
